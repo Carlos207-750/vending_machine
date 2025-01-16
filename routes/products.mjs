@@ -1,6 +1,7 @@
 import express from "express";
-import { Product } from "../db/sequelize.mjs";
+import { Product,} from "../db/sequelize.mjs";
 import { success } from "./helper.mjs";
+import {ValidationError} from "sequelize"
 const productsRouter = express();
 
 productsRouter.get("/", (req, res) => {
@@ -44,6 +45,9 @@ productsRouter.post("/", (req, res) => {
             res.json(success(message, createdProduct));
         })
         .catch((error) => {
+            if (error instanceof ValidationError) {
+                return res.status(400).json({ message: error.message, data: error });
+            }
             const message =
                 "Le produit n'a pas pu être ajouté. Merci de réessayer dans quelques instants.";
             res.status(500).json({ message, data: error });
